@@ -4,17 +4,16 @@ import com.scotiabank.codechallenger.studenthub.model.dto.StudentRequest;
 import com.scotiabank.codechallenger.studenthub.model.dto.StudentResponse;
 import com.scotiabank.codechallenger.studenthub.model.entity.Student;
 
-import java.time.LocalDateTime;
-
 public class StudentMapper {
 
     // Convierte request en entidad
     public static Student toEntity(StudentRequest request) {
         return Student.builder()
+                .id(request.getId())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
-                .createdAt(LocalDateTime.now())
+                .status(request.getStatus())
+                .age(request.getAge())
                 .build();
     }
 
@@ -24,8 +23,8 @@ public class StudentMapper {
                 .id(student.getId())
                 .firstName(student.getFirstName())
                 .lastName(student.getLastName())
-                .email(student.getEmail())
-                .createdAt(student.getCreatedAt())
+                .status(student.getStatus())
+                .age(student.getAge())
                 .build();
     }
 }

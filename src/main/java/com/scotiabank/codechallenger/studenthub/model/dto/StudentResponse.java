@@ -2,7 +2,7 @@ package com.scotiabank.codechallenger.studenthub.model.dto;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
+import com.scotiabank.codechallenger.studenthub.model.entity.StudentStatus;
 
 @Data
 @Builder
@@ -13,6 +13,6 @@ public class StudentResponse {
     private Long id;
     private String firstName;
     private String lastName;
-    private String email;
-    private LocalDateTime createdAt;
+    private StudentStatus status;
+    private Integer age;
 }

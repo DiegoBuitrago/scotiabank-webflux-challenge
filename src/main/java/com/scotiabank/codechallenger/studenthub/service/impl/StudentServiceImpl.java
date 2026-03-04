@@ -1,12 +1,18 @@
 package com.scotiabank.codechallenger.studenthub.service.impl;
 
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.stereotype.Service;
+
+import com.scotiabank.codechallenger.studenthub.exception.StudentAlreadyExistsException;
 import com.scotiabank.codechallenger.studenthub.mapper.StudentMapper;
 import com.scotiabank.codechallenger.studenthub.model.dto.StudentRequest;
 import com.scotiabank.codechallenger.studenthub.model.dto.StudentResponse;
+import com.scotiabank.codechallenger.studenthub.model.entity.Student;
+import com.scotiabank.codechallenger.studenthub.model.entity.StudentStatus;
 import com.scotiabank.codechallenger.studenthub.repository.StudentRepository;
 import com.scotiabank.codechallenger.studenthub.service.StudentService;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -15,34 +21,35 @@ import reactor.core.publisher.Mono;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository repository;
+    private final R2dbcEntityTemplate template;
 
     @Override
-    public Mono<StudentResponse> createStudent(StudentRequest request) {
-        return repository.findByEmail(request.getEmail())
-                .hasElement()
+    public Mono<Void> createStudent(StudentRequest request) {
+        return repository.existsById(request.getId())
                 .flatMap(exists -> {
                     if (exists) {
-                        return Mono.error(new RuntimeException("Email already exists"));
+                        return Mono.error(new StudentAlreadyExistsException(request.getId()));
                     }
-                    return repository.save(StudentMapper.toEntity(request))
-                            .map(StudentMapper::toResponse);
+                    Student student = Student.builder()
+                            .id(request.getId())
+                            .firstName(request.getFirstName())
+                            .lastName(request.getLastName())
+                            .status(request.getStatus())
+                            .age(request.getAge())
+                            .build();
+                    return template.insert(Student.class)
+                            .using(student)
+                            .then();
                 });
     }
 
     @Override
-    public Mono<StudentResponse> getStudentById(Long id) {
-        return repository.findById(id)
-                .map(StudentMapper::toResponse);
+    public Flux<Student> getActiveStudents() {
+        return repository.findByStatus(StudentStatus.ACTIVE);
     }
 
     @Override
     public Flux<StudentResponse> getAllStudents() {
-        return repository.findAll()
-                .map(StudentMapper::toResponse);
-    }
-
-    @Override
-    public Mono<Void> deleteStudent(Long id) {
-        return repository.deleteById(id);
+        return repository.findAll().map(StudentMapper::toResponse);
     }
 }
