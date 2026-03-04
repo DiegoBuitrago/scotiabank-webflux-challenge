@@ -23,6 +23,7 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository repository;
     private final R2dbcEntityTemplate template;
 
+    @SuppressWarnings("null")
     @Override
     public Mono<Void> createStudent(StudentRequest request) {
         return repository.existsById(request.getId())

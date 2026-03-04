@@ -9,6 +9,5 @@ import reactor.core.publisher.Flux;
 
 public interface StudentRepository extends ReactiveCrudRepository<Student, Long> {
 
-    // Método adicional para buscar por email
     Flux<Student> findByStatus(StudentStatus status);
 }
